@@ -70,8 +70,11 @@ class DeviceSerial:
         """Adds any data from serial device to the buffer"""
         # Fill up the bytes buffer furst.
         if self.arduino.inWaiting():
-            while self.arduino.inWaiting():
-                self.str_buffer += self.arduino.read().decode('ascii')
+            try:
+                while self.arduino.inWaiting():
+                    self.str_buffer += self.arduino.read().decode('ascii')
+            except BlockingIOError:
+                logging.warning('A resource is temporarly unavailable. Is another instance of this node running?');
 
         # Check bytes buffer if there are any messages in it
         while self.str_buffer.count(Message.END) > 0:

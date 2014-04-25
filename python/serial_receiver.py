@@ -4,6 +4,7 @@ __author__ = 'nick'
 import logging
 from device.serial import DeviceSerial
 import buffer
+import device_data
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +30,7 @@ def loop_process(node_id):
 
         elif message.type == 'data':
             logger.info('Recieved data from device: %d' % message.device_id)
-
+            message = device_data.convert_data(message)
             buffer.append(message)
         elif message.type == 'device':
             logger.info('Message from device %d: %s' % ( message.device_id, message.data))

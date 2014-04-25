@@ -22,6 +22,11 @@ def get_all():
     logger.info('Returning contents and cleared buffer, current count: %d'%count())
     return messages
 
+def get():
+    message = buffer.pop()
+    logger.info('Popped one message out of buffer, current count: %d'%count())
+    return message
+
 def count():
     return len(buffer)
 
@@ -43,6 +48,11 @@ def important_get_all():
     important_buffer = []
     logger.info('Return contents and cleared important buffer, current count: %d'%important_count())
     return messages
+
+def important_get():
+    message = important_buffer.pop()
+    logger.info('Popped one message out of important buffer, current count: %d'%important_count())
+    return message
 
 def important_count():
     return len(important_buffer)

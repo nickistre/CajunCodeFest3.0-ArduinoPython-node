@@ -3,10 +3,14 @@ __author__ = 'nick'
 import logging
 import serial_receiver
 import server_push
+import device_data
+import config
+
 
 # TODO: Set this and service url, etc. in a config file
-serial_port = "/dev/ttyUSB1"
-node_id = 0
+
+
+
 
 # From the perspective of the arduino unit, the host is alwasy device 0
 device_id = 0
@@ -18,16 +22,24 @@ logger = logging.getLogger(__name__)
 
 logger.info('Starting application')
 
-serial_receiver.init(node_id, serial_port)
+serial_receiver.init(config.node_id, config.serial_port)
+
+server_push.send_interval = config.send_interval
+
+server_push.service_url = config.service_url
+
+server_push.bulk_transfer_mode = config.bulk_transfer_mode
 
 
+# Update device_data module
+device_data.devices = config.devices
 
 # Main app loop
 logger.info('Starting main loop')
 exit_app = False
 while not exit_app:
-    serial_receiver.loop_process(node_id)
-    server_push.loop_process(node_id)
+    serial_receiver.loop_process(config.node_id)
+    server_push.loop_process(config.node_id)
 
 logger.info('Exiting application')
 exit()
