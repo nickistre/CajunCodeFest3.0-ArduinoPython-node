@@ -14,6 +14,13 @@ def append(message):
     logger.debug('Added message to buffer: %s'%vars(message))
     logger.info('Current buffer count: %d'%count())
 
+def prepend(message):
+    buffer.insert(0, message)
+
+def prepend_messages(messages):
+    global buffer
+    buffer = messages + buffer
+
 def get_all():
     """Returns array of all buffered messages and clears buffer"""
     global buffer
@@ -31,7 +38,6 @@ def count():
     return len(buffer)
 
 
-
 def important_append(message):
     """Adds message to the important buffer
 
@@ -40,6 +46,14 @@ def important_append(message):
     important_buffer.append(message)
     logger.debug('Added message to important buffer: %s'%vars(message))
     logger.info('Current import buffer count: %d'%important_buffer())
+
+
+def important_prepend(message):
+    important_buffer.insert(0, message)
+
+def important_prepend_messages(messages):
+    global important_buffer
+    important_buffer = messages + important_buffer
 
 def important_get_all():
     """Return arra of all buffered important messages and clears it"""

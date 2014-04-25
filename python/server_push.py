@@ -1,3 +1,5 @@
+from apport.crashdb import URLError
+
 __author__ = 'nick'
 
 import buffer
@@ -6,15 +8,19 @@ import time
 import urllib.request
 import urllib.parse
 import urllib
+from urllib.error import HTTPError
+from urllib.error import URLError
 import json
 
 logger = logging.getLogger(__name__)
 
 # TODO: Store on drive
-last_send_time = None;
+next_send_time = None;
 
 # Number of seconds to wait between sends
 send_interval = 3600
+
+error_send_interval = 30
 
 service_url = "http://localhost/test"
 
@@ -33,36 +39,36 @@ def check_important(node_id):
         send_messages(messages)
 
 def check_time(node_id):
-    if last_send_time == None:
+    if next_send_time == None:
         logger.debug('No last_send_time set, sending all messages currently in buffer')
         if (bulk_transfer_mode):
             messages = buffer.get_all()
             send_messages(messages, node_id)
-            update_last_send_time()
+            update_last_send_time(send_interval)
         else:
             if (buffer.count() > 0):
                 message = buffer.get()
                 send_message(message, node_id)
                 if (buffer.count() == 0):
-                    update_last_send_time()
+                    update_last_send_time(send_interval)
             else:
-                update_last_send_time()
+                update_last_send_time(send_interval)
 
     else:
-        if (time.time() - last_send_time > send_interval):
-            logger.debug('More than %d seconds since last send, sending now')
+        if (time.time() - next_send_time >= 0):
+            logger.debug('Next planned time passed, sending now')
             if (bulk_transfer_mode):
                 messages=buffer.get_all()
                 send_messages(messages, node_id)
-                update_last_send_time()
+                update_last_send_time(send_interval)
             else:
                 if (buffer.count() > 0):
                     message = buffer.get()
                     send_message(message, node_id)
                     if (buffer.count() == 0):
-                        update_last_send_time()
+                        update_last_send_time(send_interval)
                 else:
-                    update_last_send_time()
+                    update_last_send_time(send_interval)
 
 
 def send_message(message, node_id):
@@ -80,7 +86,19 @@ def send_message(message, node_id):
 
     service_request = urllib.request.Request(service_url)
     service_request.add_header("Content-Type","application/x-www-form-urlencoded;charset=utf-8")
-    response_stream = urllib.request.urlopen(service_request, data)
+    try:
+        response_stream = urllib.request.urlopen(service_request, data)
+    except HTTPError as err:
+        logger.error('Error connecting to server: %s - %s'%(err.code, err.reason))
+        logger.debug('Moving message back into front of buffer');
+        buffer.prepend(message)
+        update_last_send_time(error_send_interval)
+    except URLError as err:
+        logger.error('Error connecting to server: %s'%(err.reason))
+        logger.debug('Moving message back into front of buffer');
+        buffer.prepend(message)
+        update_last_send_time(error_send_interval)
+
 
 def send_messages(messages, node_id):
     if len(messages) > 0:
@@ -111,10 +129,22 @@ def send_messages(messages, node_id):
         service_request = urllib.request.Request(
             service_url,
         )
-        #service_request.add_header("Content-Type","application/x-www-form-urlencoded;charset=utf-8")
-        response_stream = urllib.request.urlopen(service_request, data)
+        try:
+            #service_request.add_header("Content-Type","application/x-www-form-urlencoded;charset=utf-8")
+            response_stream = urllib.request.urlopen(service_request, data)
+        except HTTPError as err:
+            logger.error('Error connecting to server: %s - %s'%(err.code, err.reason))
+            logger.debug('Moving messages back to front buffer')
+            buffer.prepend_messages(messages)
+            update_last_send_time(error_send_interval)
+        except URLError as err:
+            logger.error('Error connecting to server: %s'%(err.reason))
+            logger.debug('Moving messages back to front buffer')
+            buffer.prepend_messages(messages)
+            update_last_send_time(error_send_interval)
 
-def update_last_send_time():
-    global last_send_time
-    last_send_time = time.time()
-    logger.debug('Updated last_send_time to: %d'%last_send_time)
+def update_last_send_time(interval):
+    global next_send_time
+    current_time = time.time();
+    next_send_time = current_time + interval
+    logger.debug('Updated next_send_time to: %d + %d = %d'%(current_time, interval, next_send_time))

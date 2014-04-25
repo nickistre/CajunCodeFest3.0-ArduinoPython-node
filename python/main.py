@@ -26,6 +26,8 @@ serial_receiver.init(config.node_id, config.serial_port)
 
 server_push.send_interval = config.send_interval
 
+server_push.error_send_interval = config.error_send_interval
+
 server_push.service_url = config.service_url
 
 server_push.bulk_transfer_mode = config.bulk_transfer_mode
