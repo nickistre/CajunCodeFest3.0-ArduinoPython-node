@@ -18,8 +18,8 @@ devices = {
     5: pill_box
 }
 
-send_interval = 10;
-error_send_interval = 5;
+send_interval = 300;
+error_send_interval = 15;
 
 service_url = "http://codefest.winwithteamwork.com/index.php?option=com_jumi&view=application&fileid=5&Itemid=123"
 #service_url = "http://localhost:8000/"
