@@ -11,8 +11,13 @@
 #include <VirtualWire.h>
 
 #include <DeviceSerial.h>
+#include <DeviceMessage.h>
 
-DeviceSerial deviceSerial = DeviceSerial(1);
+#define DEVICE_ID 1
+
+DeviceSerial deviceSerial = DeviceSerial(DEVICE_ID);
+
+unsigned int messageCount = 0;
 
 void setup()
 {
@@ -26,10 +31,16 @@ void setup()
 
     vw_rx_start();       // Start the receiver PLL running
     
-    deviceSerial.send(String("Max Buffer Len: ") + VW_MAX_MESSAGE_LEN, "log");
+    deviceSerial.send("ready", "device");
 }
 
 void loop()
+{
+    checkRF();
+    checkSerialMessages();
+}
+
+void checkRF()
 {
     uint8_t buf[VW_MAX_MESSAGE_LEN];
     uint8_t buflen = VW_MAX_MESSAGE_LEN;
@@ -41,20 +52,48 @@ void loop()
         digitalWrite(13, true); // Flash a light to show received good message
 	// Message with a good checksum received, dump it.
 	
+        DeviceMessage deviceMessage = DeviceMessage();
         
-        String data = String("dataType: ") + buf[0] + ", data: [";
+        deviceMessage.deviceId = buf[0];
+        deviceMessage.messageId = messageCount;
+        messageCount++;
+        
+        deviceMessage.type = String("data");
+        
+        String data = String("[");
         char delim[2] = " ";	
 
 	for (i = 1; i < buflen; i++)
 	{
-          char bufVal[2];
           data += delim;
           data += buf[i];
           delim[0] = ',';
 	}
         data.concat(" ]");
         
-	deviceSerial.send(data, "data");
+        deviceMessage.data =data;
+        
+	deviceSerial.sendMessage(deviceMessage);
         digitalWrite(13, false);
     }
+}
+
+void checkSerialMessages()
+{
+    if (deviceSerial.available()) {
+    DeviceMessage message;
+    deviceSerial.receiveMessage(message);
+    
+    
+    if (message.type == "do-echo") {
+      deviceSerial.send(message.data, "echo");
+    }
+    else if(message.type == "device" && message.data == "ready?")
+    {
+      deviceSerial.send("ready", "device");
+    }
+    else {
+      deviceSerial.send(String("Received Unknown Type: "+message.type +" from device id: "+message.deviceId), "log");
+    }
+  }
 }

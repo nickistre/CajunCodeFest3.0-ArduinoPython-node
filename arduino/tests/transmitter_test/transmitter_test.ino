@@ -46,7 +46,7 @@ void loop()
     Serial.print("Data to send: ");
     Serial.println(data);
     
-    // Set deviceType
+    // Set deviceId
     msg[0] = DEVICE_ID;
     
     // Convert timer into a byte array.
