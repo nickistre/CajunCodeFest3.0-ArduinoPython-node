@@ -10,10 +10,13 @@
 
 #include <VirtualWire.h>
 
+#include <DeviceSerial.h>
+
+DeviceSerial deviceSerial = DeviceSerial(1);
+
 void setup()
 {
-    Serial.begin(9600);	// Debugging only
-    Serial.println("setup");
+    deviceSerial.init();
 
     // Initialise the IO and ISR
     vw_set_ptt_inverted(true); // Required for DR3100
@@ -23,8 +26,7 @@ void setup()
 
     vw_rx_start();       // Start the receiver PLL running
     
-    Serial.print("Max Buffer Len: ");
-    Serial.println(VW_MAX_MESSAGE_LEN);
+    deviceSerial.send(String("Max Buffer Len: ") + VW_MAX_MESSAGE_LEN, "log");
 }
 
 void loop()
@@ -38,14 +40,21 @@ void loop()
 
         digitalWrite(13, true); // Flash a light to show received good message
 	// Message with a good checksum received, dump it.
-	Serial.print("Got: ");
 	
-	for (i = 0; i < buflen; i++)
+        
+        String data = String("dataType: ") + buf[0] + ", data: [";
+        char delim[2] = " ";	
+
+	for (i = 1; i < buflen; i++)
 	{
-	    Serial.print(buf[i]);
-	    Serial.print(".");
+          char bufVal[2];
+          data += delim;
+          data += buf[i];
+          delim[0] = ',';
 	}
-	Serial.println("");
+        data.concat(" ]");
+        
+	deviceSerial.send(data, "data");
         digitalWrite(13, false);
     }
 }

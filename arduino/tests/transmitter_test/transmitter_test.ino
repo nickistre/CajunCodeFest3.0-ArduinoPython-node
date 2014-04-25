@@ -10,6 +10,8 @@
 
 #include <VirtualWire.h>
 
+#define DEVICE_ID 2
+
 unsigned long int count = 0;
 
 void setup()
@@ -39,13 +41,13 @@ void loop()
     Serial.print("Currentt count: ");
     Serial.println(count);
     
-    unsigned long int data = random(60000);
+    unsigned long int data = random(2147483647);
     
     Serial.print("Data to send: ");
     Serial.println(data);
     
-    // Set deviceId
-    msg[0] = 1;
+    // Set deviceType
+    msg[0] = DEVICE_ID;
     
     // Convert timer into a byte array.
     unsigned char byteArrayCount[sizeof(unsigned long int)];
