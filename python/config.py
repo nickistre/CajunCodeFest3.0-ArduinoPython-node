@@ -3,8 +3,8 @@ __author__ = 'nick'
 from message_convert_functions import *
 
 serial_ports = [
-    "/dev/ttyUSB1",
-    #"/dev/ttyACM1"
+    "/dev/ttyUSB0",
+    "/dev/ttyACM1"
     ]
 
 node_id = 1

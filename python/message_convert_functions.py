@@ -21,8 +21,8 @@ def timer_random(message):
 def motion_sensor(message):
     logger.info('convert data to longs, mean & standard deviation');
 
-    old_data = message.data;
-    mean_data = old_data[0:3];
+    old_data = json.loads(message.data)
+    mean_data = old_data[0:3]
     std_dev_data = old_data[3:7];
 
     mean = int.from_bytes(mean_data, byteorder='little', signed=True)
