@@ -2,13 +2,19 @@ __author__ = 'nick'
 
 from message_convert_functions import *
 
-serial_port = "/dev/ttyUSB1"
+serial_ports = [
+    "/dev/ttyUSB1",
+    "/dev/ttyACM1"
+    ]
 
 node_id = 0
 
 devices = {
+#  device_id: convert function
     1: timer_random,
     2: timer_random,
+    3: motion_sensor,
+    4: grocery_scanner
 }
 
 send_interval = 600;

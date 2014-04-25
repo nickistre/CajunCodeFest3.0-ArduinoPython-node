@@ -36,6 +36,10 @@ def pill_scale(message):
     # TODO: Stub
     return message
 
+def grocery_scanner(message):
+    logger.info('Grocery RFID scanner, no change to message')
+    return message
+
 def none(message):
     logger.info('No change to message')
     return message;

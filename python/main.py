@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 logger.info('Starting application')
 
-serial_receiver.init(config.node_id, config.serial_port)
+serial_receiver.init(config.node_id, config.serial_ports)
 
 server_push.send_interval = config.send_interval
 
