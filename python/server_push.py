@@ -68,6 +68,7 @@ def check_time(node_id):
                     if (buffer.count() == 0):
                         update_last_send_time(send_interval)
                 else:
+                    logger.debug('No messages in buffer to send')
                     update_last_send_time(send_interval)
 
 
@@ -81,11 +82,11 @@ def send_message(message, node_id):
     #data_messages.append(data_message)
 
     logger.debug('data_message: %s'%repr(data_message))
-    data = urllib.parse.urlencode(data_message, True).encode('utf-8')
+    data = urllib.parse.urlencode(data_message,).encode('utf-8')
     logger.debug('Data stream: %s'%data);
 
     service_request = urllib.request.Request(service_url)
-    service_request.add_header("Content-Type","application/x-www-form-urlencoded;charset=utf-8")
+    #service_request.add_header("Content-Type","application/x-www-form-urlencoded;charset=utf-8")
     try:
         response_stream = urllib.request.urlopen(service_request, data)
     except HTTPError as err:
@@ -122,7 +123,7 @@ def send_messages(messages, node_id):
         data_messages_json = json.dumps(data_messages)
         logger.debug('data_messages_json: %s'%data_messages_json)
 
-        data=urllib.parse.urlencode({"messages": data_messages_json}, True).encode('utf-8')
+        data=urllib.parse.urlencode({"messages": data_messages_json}).encode('utf-8')
         logger.debug('Data stream: %s'%data)
 
         logger.debug('Connecting to service url: %s'%service_url)

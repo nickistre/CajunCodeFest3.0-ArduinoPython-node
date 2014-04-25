@@ -4,21 +4,22 @@ from message_convert_functions import *
 
 serial_ports = [
     "/dev/ttyUSB1",
-    "/dev/ttyACM1"
+    #"/dev/ttyACM1"
     ]
 
-node_id = 0
+node_id = 1
 
 devices = {
 #  device_id: convert function
     1: timer_random,
     2: timer_random,
-    3: motion_sensor,
-    4: grocery_scanner
+    51: motion_sensor,
+    4: trash_scanner,
+    5: pill_box
 }
 
-send_interval = 600;
-error_send_interval = 30;
+send_interval = 10;
+error_send_interval = 5;
 
 service_url = "http://codefest.winwithteamwork.com/index.php?option=com_jumi&view=application&fileid=5&Itemid=123"
 #service_url = "http://localhost:8000/"

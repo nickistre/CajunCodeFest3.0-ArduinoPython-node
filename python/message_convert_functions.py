@@ -10,14 +10,8 @@ def timer_random(message):
     logger.info('convert data to long int')
     old_data = json.loads(message.data)
 
-    current_shift = 0;
-    data_number = 0;
+    data_number = int.from_bytes(old_data, byteorder='little', signed=False)
 
-    for x in old_data:
-        value = x * pow(2, current_shift)
-        logger.debug('%d * pow(%d, %d) = %d'%(value, 2, current_shift, value));
-        data_number = data_number + value
-        current_shift = current_shift + 8
 
     logger.debug('Final value is %d'%(data_number))
     message.data = data_number
@@ -25,7 +19,20 @@ def timer_random(message):
     return message;
 
 def motion_sensor(message):
-    # TODO: Stub
+    logger.info('convert data to longs, mean & standard deviation');
+
+    old_data = message.data;
+    mean_data = old_data[0:3];
+    std_dev_data = old_data[3:7];
+
+    mean = int.from_bytes(mean_data, byteorder='little', signed=True)
+    std_dev = int.from_bytes(std_dev_data, byteorder='little', signed=True)
+
+    data = json.dumps({'mean': mean, 'std_dev': std_dev})
+    logger.debug('Converted values: %s'%data);
+
+    message.data = data
+
     return message;
 
 def trash_scale(message):
@@ -36,8 +43,25 @@ def pill_scale(message):
     # TODO: Stub
     return message
 
+def pill_box(message):
+    logger.info('convert data to a string')
+    old_data = json.loads(message.data)
+
+    logger.debug('old data: %s'%repr(old_data))
+
+    value = ''.join(chr(i) for i in old_data);
+
+    logger.debug('value from data: %s'%value)
+
+    message.data = value;
+    return message
+
 def grocery_scanner(message):
     logger.info('Grocery RFID scanner, no change to message')
+    return message
+
+def trash_scanner(message):
+    logger.info('Trash RFID scanner, no change to message')
     return message
 
 def none(message):
