@@ -22,8 +22,8 @@ def motion_sensor(message):
     logger.info('convert data to longs, mean & standard deviation');
 
     old_data = json.loads(message.data)
-    mean_data = old_data[0:3]
-    std_dev_data = old_data[3:7];
+    mean_data = old_data[0:4]
+    std_dev_data = old_data[4:8];
 
     mean = int.from_bytes(mean_data, byteorder='little', signed=True)
     std_dev = int.from_bytes(std_dev_data, byteorder='little', signed=True)

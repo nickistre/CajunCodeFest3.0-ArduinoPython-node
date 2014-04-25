@@ -88,7 +88,7 @@ def send_message(message, node_id):
     service_request = urllib.request.Request(service_url)
     #service_request.add_header("Content-Type","application/x-www-form-urlencoded;charset=utf-8")
     try:
-        response_stream = urllib.request.urlopen(service_request, data)
+        response_stream = urllib.request.urlopen(service_request, data, timeout=30)
     except HTTPError as err:
         logger.error('Error connecting to server: %s - %s'%(err.code, err.reason))
         logger.debug('Moving message back into front of buffer');
@@ -97,6 +97,10 @@ def send_message(message, node_id):
     except URLError as err:
         logger.error('Error connecting to server: %s'%(err.reason))
         logger.debug('Moving message back into front of buffer');
+        buffer.prepend(message)
+        update_last_send_time(error_send_interval)
+    except:
+        logger.error('Some other error occurred')
         buffer.prepend(message)
         update_last_send_time(error_send_interval)
 
@@ -132,7 +136,7 @@ def send_messages(messages, node_id):
         )
         try:
             #service_request.add_header("Content-Type","application/x-www-form-urlencoded;charset=utf-8")
-            response_stream = urllib.request.urlopen(service_request, data)
+            response_stream = urllib.request.urlopen(service_request, data, timeout=30)
         except HTTPError as err:
             logger.error('Error connecting to server: %s - %s'%(err.code, err.reason))
             logger.debug('Moving messages back to front buffer')
@@ -141,6 +145,10 @@ def send_messages(messages, node_id):
         except URLError as err:
             logger.error('Error connecting to server: %s'%(err.reason))
             logger.debug('Moving messages back to front buffer')
+            buffer.prepend_messages(messages)
+            update_last_send_time(error_send_interval)
+        except:
+            logger.error('Some other error occurred');
             buffer.prepend_messages(messages)
             update_last_send_time(error_send_interval)
 
